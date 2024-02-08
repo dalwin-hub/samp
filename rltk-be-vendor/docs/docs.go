@@ -1,0 +1,863 @@
+package docs
+
+import (
+	"bytes"
+	"encoding/json"
+	"github.com/swaggo/swag"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+	"text/template"
+)
+
+var doc = `{
+    "schemes": {{ marshal .Schemes }},
+	  "openapi": "3.0.3",
+  "info": {
+    "title": "Vendor-API",
+    "description": "This contains API Required for  Vendor-API Module",
+    "version": "0.5"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Vendor",
+      "description": "Everything about your  Vendor-API",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    }
+  ],
+  "paths": {
+    "/vendor": {
+      "post": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Create a vendor data",
+        "description": "Used to create vendor data.",
+        "operationId": "addVendor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Inserted Id sgsfjhfd12"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Find vendor",
+        "description": "Used to get all Vendor data.  Sort description:- By default   sorting is done by vendor created date.“sortVariable” should be the variable by which sorting should be done. Sorting can only be done by \"firstName\" for the Name field. For Sorting Key values inside another Keyvalues,provide “sortVariable” value as keyvalue_name.keyvalue_name. Else just provide the key value name. sortMethodId value should be 1 for “Ascending” Sort Method. sortMethodId value should be -1 for “Descending” Sort Method.",
+        "operationId": "getVendor",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorSort"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VendorHomeViewResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/vendor/{id}": {
+      "get": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Find vendor by id",
+        "description": "Used to get specific vendor’s whole data.",
+        "operationId": "getVendorid",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "“Id” = vendor’s object-id/unique-id in string format",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VendorQuickViewResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error Message"
+          },
+          "500": {
+            "description": "Error Message"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Deletes a Vendor by id",
+        "description": "Used to delete the Requested vendor data.",
+        "operationId": "deleteVendor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "“Id” = vendor’s object-id/unique-id in string format",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vendor has been deleted"
+          },
+          "400": {
+            "description": "BadRequest"
+          },
+          "404": {
+            "description": "NotFound"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Update a Vendor by id",
+        "description": "Used to update the Requested vendor data.",
+        "operationId": "UpdateVendor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "“Id” = vendor’s object-id/unique-id in string format",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vendor has been updated"
+          },
+          "400": {
+            "description": "Error message"
+          },
+          "404": {
+            "description": "Vendor Not Found"
+          },
+          "422": {
+            "description": "Error message"
+          },
+          "500": {
+            "description": "Error message"
+          }
+        }
+      }
+    },
+    "/vendor/filter/gettechnologies": {
+      "get": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Find vendor by technologies",
+        "description": "Used to get all vendor’s Technologies data.",
+        "operationId": "getVendortechnologies",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": [
+                    "C++",
+                    "testing",
+                    "Testing",
+                    "golang",
+                    "python",
+                    "java",
+                    "react"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error message"
+          },
+          "404": {
+            "description": "Error message"
+          }
+        }
+      }
+    },
+    "/vendor/filter": {
+      "post": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Find vendor by filter",
+        "description": "Used to filter the Vendor Data.",
+        "operationId": "getVendor filter",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "tenantId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "in": "query",
+            "description": "businessId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "in": "query",
+            "description": "businessUnitId of vendor to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorFilterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "StatusOK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VendorHomeViewResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error message"
+          },
+          "404": {
+            "description": "Error message"
+          }
+        }
+      }
+    },
+    "/vendor/filter/getavailabledetails": {
+      "get": {
+        "tags": [
+          "Vendor"
+        ],
+        "summary": "Find vendor by technologies",
+        "description": "Used to get Vendor Filter’s Available details dropdown values.",
+        "operationId": "getVendordetails",
+        "responses": {
+          "200": {
+            "description": "StatusOK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": [
+                    "Vendor company",
+                    "Technologies",
+                    "Contact Person",
+                    "Contact Number",
+                    "Email"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VendorCreateRequest": {
+        "required": [
+          "businessId",
+          "businessUnitId",
+          "createdBy",
+          "schemaVersion",
+          "tenantId",
+          "vendorCompanyName"
+        ],
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "example": "82c782a4aa626175e5d11afa"
+          },
+          "businessUnitId": {
+            "type": "string",
+            "example": "91c782a4aa626175e5d11afa"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "71c782a4aa626175e5d11afa"
+          },
+          "schemaVersion": {
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "tenantId": {
+            "type": "string",
+            "example": "71c782a4aa626175e5d11afa"
+          },
+          "vendorCompanyName": {
+            "type": "string",
+            "example": "Amazon"
+          },
+          "vendorContact": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorContactRequest"
+            }
+          },
+          "vendorTechnologies": {
+            "type": "string",
+            "example": [
+              "java",
+              "python"
+            ]
+          }
+        }
+      },
+      "VendorContactRequest": {
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "contactCountrycodeId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "contactNumber": {
+            "type": "string",
+            "example": 984787587
+          },
+          "email": {
+            "type": "string",
+            "example": "fgjh@hotmail.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "first"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "last"
+          }
+        }
+      },
+      "VendorContactResponse": {
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "contactCountrycodeId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "contactNumber": {
+            "type": "string",
+            "example": 9847875875
+          },
+          "email": {
+            "type": "string",
+            "example": "fgjh@hotmail.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "first"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "last"
+          },
+          "vendorContactIsDeleted": {
+            "type": "boolean",
+            "example": false
+          },
+          "vendorContactId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 0
+          }
+        }
+      },
+      "VendorHomeViewResponse": {
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "63d7c120e90445fb937fb7bf"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2023-01-30T13:07:44.962Z"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "71c782a4aa626175e5d11afa"
+          },
+          "vendorCompanyName": {
+            "type": "string",
+            "example": "Deloitee"
+          },
+          "vendorContact": {
+            "$ref": "#/components/schemas/VendorContactResponse"
+          },
+          "vendorTechnologies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pyhton,java"
+            }
+          }
+        }
+      },
+      "VendorQuickViewResponse": {
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "63d7c120e90445fb937fb7bf"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2023-01-30T13:07:44.962Z"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "71c782a4aa626175e5d11afa"
+          },
+          "updatedBy": {
+            "type": "string",
+            "example": "13c782a4aa626175e5d11afa"
+          },
+          "vendorCompanyName": {
+            "type": "string",
+            "example": "HCL"
+          },
+          "vendorContact": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorContactResponse"
+            }
+          },
+          "vendorDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorDocument"
+            }
+          },
+          "vendorTechnologies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pyhton,java"
+            }
+          }
+        }
+      },
+      "VendorUpdate": {
+        "required": [
+          "schemaVersion",
+          "vendorCompanyName",
+          "updatedBy"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "vendorCompanyName": {
+            "type": "string",
+            "example": "Deloitee"
+          },
+          "vendorTechnologies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pyhton,java"
+            }
+          },
+          "updatedBy": {
+            "type": "string",
+            "example": "82c782a4aa626175e5d11afb"
+          },
+          "vendorContact": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorContactRequest"
+            }
+          }
+        }
+      },
+      "VendorSort": {
+        "properties": {
+          "sortVariable": {
+            "type": "string",
+            "example": "vendorContact.firstName"
+          },
+          "sortMethodId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          }
+        }
+      },
+      "VendorFilterRequest": {
+        "type": "object",
+        "properties": {
+          "availableDetails": {
+            "type": "object",
+            "properties": {
+              "vendorCompany": {
+                "type": "boolean"
+              },
+              "technologies": {
+                "type": "boolean"
+              },
+              "contactPerson": {
+                "type": "boolean"
+              },
+              "contactNumber": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              }
+            }
+          },
+          "vendorTechnologies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pyhton,java"
+            }
+          },
+          "sortOptions": {
+            "properties": {
+              "sortVariable": {
+                "type": "string",
+                "example": "vendorContact.firstName"
+              },
+              "sortMethodId": {
+                "type": "integer",
+                "format": "int32",
+                "example": -1
+              }
+            }
+          }
+        }
+      },
+      "VendorDocument": {
+        "type": "object",
+        "properties": {
+          "vendorUploadName": {
+            "type": "string",
+            "example": "asfg.jpg"
+          },
+          "vendorDocumentsUniqueName": {
+            "type": "string",
+            "example": "Doc01"
+          },
+          "VendorDocumentsLocation": {
+            "type": "string",
+            "example": "https://www.asaf.com"
+          }
+        }
+      }
+    }
+  }
+}`
+
+type swaggerInfo struct {
+	Version     string
+	Host        string
+	BasePath    string
+	Schemes     []string
+	Title       string
+	Description string
+}
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = swaggerInfo{
+	Version:     "1.0",
+	Host:        "localhost:7000",
+	BasePath:    "/",
+	Schemes:     []string{},
+	Title:       "Go MVP Server API",
+	Description: "This is a MVP backend server",
+}
+
+type s struct{}
+
+func (s *s) ReadDoc() string {
+	sInfo := SwaggerInfo
+	sInfo.Description = strings.Replace(sInfo.Description, "\n", "\\n", -1)
+
+	pwd, _ := os.Getwd()
+	content, err := ioutil.ReadFile(pwd + "/docs/swagger.json")
+	if err != nil {
+		log.Panic("Error when opening file: ", err)
+	}
+
+	t, err := template.New("swagger_info").Funcs(template.FuncMap{
+		"marshal": func(v interface{}) string {
+			a, _ := json.Marshal(v)
+			return string(a)
+		},
+		"escape": func(v interface{}) string {
+			// escape tabs
+			str := strings.Replace(v.(string), "\t", "\\t", -1)
+			// replace " with \", and if that results in \\", replace that with \\\"
+			str = strings.Replace(str, "\"", "\\\"", -1)
+			return strings.Replace(str, "\\\\\"", "\\\\\\\"", -1)
+		},
+	}).Parse(string(content))
+	if err != nil {
+		return doc
+	}
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, sInfo); err != nil {
+		return doc
+	}
+
+	return tpl.String()
+}
+
+func init() {
+	swag.Register(swag.Name, &s{})
+}
